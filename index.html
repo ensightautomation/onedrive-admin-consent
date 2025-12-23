@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Consent - OneDrive Integration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            padding: 50px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        .loading { color: #3b82f6; }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 16px;
+            color: #1f2937;
+        }
+        
+        p {
+            color: #6b7280;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        
+        .detail {
+            background: #f3f4f6;
+            padding: 16px;
+            border-radius: 8px;
+            margin: 24px 0;
+            font-size: 14px;
+        }
+        
+        .detail strong {
+            color: #374151;
+        }
+        
+        .close-message {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 14px;
+            color: #9ca3af;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .icon {
+                font-size: 48px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="result"></div>
+    </div>
+    
+    <script>
+        // Parse URL parameters
+        const params = new URLSearchParams(window.location.search);
+        const error = params.get('error');
+        const errorDescription = params.get('error_description');
+        const tenant = params.get('tenant');
+        const adminConsented = params.get('admin_consent');
+        
+        const resultDiv = document.getElementById('result');
+        
+        if (error) {
+            // Admin consent failed
+            resultDiv.innerHTML = `
+                <div class="icon error">❌</div>
+                <h1>Admin Consent Failed</h1>
+                <p>There was an issue granting admin consent for your organization.</p>
+                <div class="detail">
+                    <p><strong>Error:</strong> ${error}</p>
+                    ${errorDescription ? `<p><strong>Details:</strong> ${errorDescription}</p>` : ''}
+                </div>
+                <p>Please try again or contact your application administrator for assistance.</p>
+            `;
+        } else if (adminConsented === 'True' || tenant) {
+            // Admin consent successful
+            resultDiv.innerHTML = `
+                <div class="icon success">✅</div>
+                <h1>Admin Consent Successful!</h1>
+                <p>Your organization has been successfully configured to use OneDrive integration.</p>
+                ${tenant ? `<div class="detail"><p><strong>Organization ID:</strong> ${tenant}</p></div>` : ''}
+                <p>All users in your organization can now connect their OneDrive accounts in the application.</p>
+                <div class="close-message">
+                    You can safely close this window.
+                </div>
+            `;
+        } else {
+            // Processing or unexpected state
+            resultDiv.innerHTML = `
+                <div class="icon loading">⏳</div>
+                <h1>Processing...</h1>
+                <p>Please wait while we confirm your admin consent.</p>
+            `;
+        }
+    </script>
+</body>
+</html>
+https://login.microsoftonline.com/organizations/adminconsent?client_id=0179610a-745b-4c98-9e99-f229ed677955&redirect_uri=https://johndoe.github.io/onedrive-admin-consent/
